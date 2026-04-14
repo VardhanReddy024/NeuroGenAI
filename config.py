@@ -1,0 +1,1 @@
+DB_URL = "sqlite:///hospital.db"
