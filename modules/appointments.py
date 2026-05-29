@@ -334,3 +334,35 @@ def admin_appointment_panel():
         st.info("No audit logs yet.")
     else:
         st.dataframe(logs_df, use_container_width=True)
+
+
+def admin_home_services_and_queries_panel():
+    st.subheader("🏡 Home Care Service Bookings")
+    from database.db import get_home_services, update_home_service_status
+    hs_df = get_home_services()
+    if hs_df.empty:
+        st.info("No home service requests found.")
+    else:
+        st.dataframe(hs_df, use_container_width=True)
+        
+        st.markdown("### Update Home Service Status")
+        h_cols = st.columns([1, 1, 1])
+        with h_cols[0]:
+            sel_hs_id = st.selectbox("Select Home Service Request ID", hs_df["id"].tolist())
+        with h_cols[1]:
+            new_hs_status = st.selectbox("Select Status", ["Pending", "Scheduled", "Completed", "Cancelled"], key="hs_status_update_sel")
+        with h_cols[2]:
+            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+            if st.button("Update Home Service Status", key="hs_status_update_btn"):
+                update_home_service_status(sel_hs_id, new_hs_status)
+                st.success(f"Home Service #{sel_hs_id} status updated to {new_hs_status}!")
+                st.rerun()
+
+    st.markdown("---")
+    st.subheader("✉️ Received Contact Queries")
+    from database.db import get_contact_queries
+    queries_df = get_contact_queries()
+    if queries_df.empty:
+        st.info("No contact inquiries found.")
+    else:
+        st.dataframe(queries_df, use_container_width=True)

@@ -78,6 +78,6 @@ df = df.sort_values("Admission_Date").reset_index(drop=True)
 # ---------- SAVE ----------
 df.to_csv("data/hospital_data.csv", index=False)
 
-print("✅ Dataset created successfully!")
+print("Dataset created successfully!")
 print("Rows:", len(df))
 print(df.head())

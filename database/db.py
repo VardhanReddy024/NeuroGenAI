@@ -71,6 +71,32 @@ def init_db():
     )
     """)
 
+    # ---------- CONTACT QUERIES TABLE ----------
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS contact_queries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        subject TEXT,
+        message TEXT,
+        created_at TEXT
+    )
+    """)
+
+    # ---------- HOME SERVICES TABLE ----------
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS home_services (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_name TEXT,
+        service_type TEXT,
+        appointment_date TEXT,
+        phone TEXT,
+        address TEXT,
+        status TEXT DEFAULT 'Pending',
+        created_at TEXT
+    )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -285,3 +311,62 @@ def get_audit_logs():
     """, conn)
     conn.close()
     return df
+
+
+# ---------- CONTACT QUERIES ----------
+def save_contact_query(name, email, subject, message):
+    conn = get_connection()
+    conn.execute(
+        """
+        INSERT INTO contact_queries (name, email, subject, message, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (name, email, subject, message, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_contact_queries():
+    conn = get_connection()
+    df = pd.read_sql("SELECT * FROM contact_queries ORDER BY created_at DESC", conn)
+    conn.close()
+    return df
+
+
+# ---------- HOME SERVICES ----------
+def save_home_service(patient_name, service_type, appointment_date, phone, address):
+    conn = get_connection()
+    conn.execute(
+        """
+        INSERT INTO home_services (patient_name, service_type, appointment_date, phone, address, status, created_at)
+        VALUES (?, ?, ?, ?, ?, 'Pending', ?)
+        """,
+        (patient_name, service_type, appointment_date, phone, address, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_home_services(patient_name=None):
+    conn = get_connection()
+    if patient_name:
+        df = pd.read_sql(
+            "SELECT * FROM home_services WHERE patient_name = ? ORDER BY appointment_date DESC",
+            conn,
+            params=(patient_name,)
+        )
+    else:
+        df = pd.read_sql("SELECT * FROM home_services ORDER BY appointment_date DESC", conn)
+    conn.close()
+    return df
+
+
+def update_home_service_status(service_id, status):
+    conn = get_connection()
+    conn.execute(
+        "UPDATE home_services SET status = ? WHERE id = ?",
+        (status, service_id)
+    )
+    conn.commit()
+    conn.close()
