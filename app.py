@@ -22,8 +22,11 @@ from modules.website_features import show_home, show_about, show_services, show_
 st.set_page_config(page_title="NeuroGen AI - Hospital Dashboard", layout="wide")
 
 # ---------- PREMIUM CSS ----------
-with open("static/style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+import pathlib
+css_path = pathlib.Path(__file__).parent / "static" / "style.css"
+if css_path.is_file():
+    with open(css_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # ---------- INIT ----------
 if "db_initialized" not in st.session_state:
